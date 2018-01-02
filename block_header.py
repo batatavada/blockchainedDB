@@ -17,15 +17,14 @@ class block_header:
         self.index = index
         self.previous_block_hash = None
         self.timestamp = get_unix_time() #This is used in bitcoin
-        #self.timestamp_readable = get_readable_time()
+        self.timestamp_readable = get_readable_time()
         self.difficulty_target = difficulty_target
-        self.nonce = randrange(2**32)
+        self.nonce = set_nonce()
  
 
     # HASH FUNCTION OF REQUIRED NUMBER OF ARGUMENTS
     def get_block_hash(self):
-
-        block_hash = hash_256(self.version, self.previous_block_hash)
+        block_hash = hash_256(self.version, self.previous_block_hash, self.timestamp, get_difficulty_target, randomly_incremented_nonce)
 
     def search(self):
         self.increment_nonce()
@@ -33,8 +32,7 @@ class block_header:
 
     # SETTING TIME
     def get_unix_time():
-        pass
-
+        return time.time()
     def get_readable_time():
         return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     
@@ -46,14 +44,14 @@ class block_header:
     
     # GETTING AND SETTING NONCE
     def set_nonce(self, nonce):
-        self.nonce = nonce
+        self.nonce = randrange(2**32)
     def get_nonce(self):
         return self.nonce
     
 
     # PROOF OF WORK
-    def increment_nonce(self):
-        self.nonce = int(self.nonce+1)
+    def randomly_incremented_nonce(self):
+        self.nonce = randrange(2**32)
         return self.nonce
     #https://en.bitcoin.it/wiki/Hashcash READ THIS
     def proof_of_work(self, starting_value):
@@ -71,12 +69,10 @@ class block_header:
     
 
     # GETTING AND SETTING DIFFICULTY TARGET
-    def set_previous_block_hash(self):
-        previous_block = get_previous_block()
-        previous_block_hash = get_hash(previous_block)
-    def get_previous_block(self):
-        ##write code
-        return previous_block
+    def set_difficulty_target(self):
+        self.difficulty_target = 1 # temporarily
+    def get_difficulty_target(self):
+        return self.difficulty_target
 
    
 

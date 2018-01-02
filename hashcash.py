@@ -1,8 +1,9 @@
 
-def search():
-	pass
+'''
 
-    
+'''   
+class hashcash:
+
         
 
 

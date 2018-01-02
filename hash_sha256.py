@@ -12,26 +12,22 @@ Why base-58 instead of standard base-64 encoding? (IN BITCOIN)
 '''
 
 #Concatenating incoming arguments and hashing with sha256
-class hash_256
-	
-	data = None
+class hashing:
 
-	def __init__(self, *args):
-
-		# Concatenating incoming arguments using ":"
-		for arg in *args:
-			self.data.addTodata(arg)
+	# Concatenating incoming arguments using ":"
+	def concat(self, *args):
+		string = ""
+		for arg in args:
+			string+= "" if (arg == "") else (b64decode(arg) + ":")
+		data = string[:-1]
+		return data
 
 		#assuming incoming arguments(strings) are of base-64 encoded format
 		#convert to utf-8 as SHA only accepts byte-streams
 
+	def get_hash(self, data):
 		h = SHA256.new()
-		#data = b64encode(b"srijita:paul:kjsce:computers")
 		h.update(data)
-		final_hash = b64encode(h.digest())
-		print(final_hash)
-		return final_hash 
-
-	def addTodata(self, arg):
-		self.data+=arg+":"
+		final_hash = b64encode(h.hexdigest())
+		return final_hash
 
