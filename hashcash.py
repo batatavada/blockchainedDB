@@ -1,45 +1,81 @@
 
-'''
 
-'''   
+import unittest
+from base64 import b64encode, b64decode 
+import block_header_hash as b
+import hash_sha256 as h
+import binascii
+import time
+
+
 class hashcash:
 
-        
+	bhash = b.block_hash()
+
+	def get_target(self, bits):
+		#REFERENCE: https://bitcoin.stackexchange.com/questions/44579/how-is-a-block-header-hash-compared-to-the-target-bits
+		
+		print("bits:"+bits)
+		bits = self.bhash.little_endian(bits)
+		exponent, coefficient = "0x" + bits[:2], "0x" + bits[2:]
+		print("exponent, coefficient:"+ exponent, coefficient)
+		target = hex(int(coefficient,16) * 2**(8*(int(exponent,16) - 3))).rstrip("L").lstrip("0x")
+		print(target)
+		target = target.zfill(64)
+		#print("TARGET:" + target)
+		return target
 
 
+	def proof_of_work(self, vars):
+		print("PROOF OF WORK")
+		# example from https://blockexplorer.com/block/00000000000000001e8d6829a8a21adc5d38d0a473b144b6765798e61f98bd1d
 
+		#m = b"Hello, world!"
+		print("vars:"+vars)
+		target = self.get_target(vars[-8:])
+		print("target: {}".format(target))
+
+		nonce = 2504433940
+		interim_hash = self.bhash.get_block_hash(vars, str(nonce))
+		#print("interim_hash: {}".format(interim_hash))
+		start_time = time.time()	
+
+		while(interim_hash > target):
+			print(nonce)
+			nonce = nonce + 1
+			interim_hash = self.bhash.get_block_hash(vars, str(nonce))		
+
+		end_time = time.time()
+		print("Nonce: {} found in Time: {} seconds.".format(nonce,(end_time - start_time)))
+		print("Final hash: {}".format(interim_hash))
+		return nonce
 '''
-Hashcash function
+#OUTPUT
+...
+...
+...
+2504433968
+2504433969
+2504433970
+2504433971
+2504433972
+2504433973
+2504433974
+2504433975
+2504433976
+2504433977
+2504433978
+2504433979
+2504433980
+2504433981
+2504433982
+2504433983
+2504433984
+2504433985
+Nonce: 2504433986 found in Time: 35692.147s  ie 9.9144444 hours
+Final hash: 00000000000000001e8d6829a8a21adc5d38d0a473b144b6765798e61f98bd1d
+ok
+Testing Completed
 
-The hashcash algorithm is relatively simple to understand. The idea builds on a security property of cryptographic hashes, that they are designed to be hard to invert (so-called one-way or pre-image resistant property). You can compute y from x cheaply y=H(x) but it's very hard to find x given only y. A full hash inversion has a known computationally infeasible brute-force running time, being O(2^k) where k is the hash size eg SHA256, k=256, and if a pre-image was found anyone could very efficiently verify it by computing one hash, so there is a huge asymmetry in full pre-image mining (computationally infeasible) vs verification (a single hash invocation).
 
-A second hash pre-image means given one-preimage x of hash y where y=H(x), the task is to find another pre-image of hash y: x' so that y=H(x'). This is not to be confused with a birthday collision which is to find two values x, x' so that H(x)=H(x'), this can be done in much lower work O(sqrt(2^k))=O(2^(k/2)) because you can proceed by computing many H(x) values and storing them until you find a matching pair. It takes a lot of memory, but there are memory-time tradeoffs.
-
-Version 0 of hashcash protocol (1997) used a partial 2nd pre-image, however the later version 1 (2002) uses partial pre-images of a fairly chosen string, rather than digits of pi or something arbitrary, 0^k (ie all 0 string) is used for convenience, so the work is to find x such that H(x)=0. This is also equally fair and only requires one hash invocation to verify vs two with 2nd partial-pre-images. (This optimisation was proposed by Hal Finney & independently by Thomas Boschloo). To make the work easier the definition of a partial-pre-image is to find x such that H(x)/2^(n-k) = 0 where / is the integer quotient from division, n is the size of the hash output (n=256-bits for SHA256) and k is the work factor, ie, the first k bits of the hash output are 0 . So for example k=20 requires average 1 million tries. It is actually the output that partially matches, not the pre-image, so could perhaps more accurately called a pre-image with a partial output match, however partial pre-image effectively a short-hand for that.
-Adding purpose
-
-If the partial-pre-image x from y=H(x) is random it is just a disconnected proof-of-work to no purpose, everyone can see you did do the work, but they don't know why, so users could reuse the same work for different services. To make the proof-of-work be bound to a service, or purpose, the hash must include s, a service string so the work becomes to find H(s,c)/2^(n-k)=0. The miner varies counter c until this is true. The service string could be a web server domain name, a recipients email address, or in bitcoin a block of the bitcoin blockchain ledger.
-
-One additional problem is that if multiple people are mining, using the same service string, they must not start with the same x or they may end up with the same proof, and anyone looking at it will not honor a duplicated copy of the same work as it could have been copied without work, the first to present it will be rewarded, and others will find their work rejected. To avoid risking wasting work in this way, there needs to be a random starting point, and so the work becomes to find H(s,x,c)/2^(n-k) = 0 where x is random (eg 128-bits to make it statistically infeasible for two users to maliciously or accidentally start at the same point), and c is the counter being varied, and s is the service string.
-
-This is what hashcash version 1 and bitcoin does. In fact in bitcoin the service string is the coinbase and the coinbase includes the recipients reward address, as well as the transactions to validate in the block. Bitcoin actually does not include a random start point x, reusing the reward address as the randomization factor to avoid collisions for this random start point purpose, which saves 16-bytes of space in the coinbase. For privacy bitcoin expect the miner to use a different reward address on each successful block.
-More Precise Work
-
-Hashcash as originally proposed has work 2^k where k is an integer, this means difficulty can only be scaled in powers of 2, this is slightly simpler as you can see and fully measure the difficulty just by counting 0s in hex/binary and was adequate for prior uses. (A lot of hashcash design choices are motivated by simplicity).
-
-But because bitcoin needs more precise and dynamic control of work (to target 10-minute block interval accurately), it changes k to be a fractional (floating-point) so the work becomes to find H(s,x,c) < 2^(n-k) which is equivalent if k is an integer. Bitcoin defines target = 2^(n-k), so the work can be more simply written to find H(s,x,c) < target. Of course because of luck the block time actually has quite high variance, but the average is still more accurately targeted by the introduction of fractional k.
-Work, difficulty & cryptographic security
-
-Hashcash expresses security margin in the standard cryptographic security terms O(2^k) where for comparison DES offers k=56-bits of security, ECDSA-256 offers k=128-bits of security, and because its widely used this log2 way of expressing work and security can also be useful for making security comparisons.
-
-Bitcoin rate of work is called the network hashrate in GH/sec. As the target block interval is 10 minutes that can be converted to cryptographic security as log2(hashrate*600), so that of Nov 2013 hashrate is 4 petahash/sec and bitcoin's hashcash-256^2 proofs-of-works are 62-bits (including +1 for double hash).
-
-Bitcoin also defines a new notion of (relative) difficulty which is the work required so that at current network hashrate a block is expected to be found every 10 minutes. It is expressed relative to a minimum work unit of 2^32 iterations (approximately, technically minimum work is 0xFFFF0000 due to bitcoin implementation level details). Bitcoin difficulty is simple to approximately convert to log2 cryptographic security: k=log2(difficulty)+32 (or for high accuracy log2(difficulty*0xFFFF0000)). Difficulty is related to the target simply as difficulty = target / 0xFFFF0000.
-
-It is perhaps easier to deal with high difficulties in log2 scale (a petahash/second is a 16 decimal digit number of hashes per second), and makes them comparable to other cryptographic security statements. For example the EFF "deepcrack" DES cracker project built a hardware brute force machine capable of breaking a DES key in 56 hours to make a political point that 56-bit DES was too weak in 1998 at a cost of $250,000 (plus volunteer design time). By comparison bitcoin network does 62-bits (including +1 for double hash) every 10-minutes and is 537,000 times more powerful than deepcrack, or could if it were focused on DES rather than SHA256 crack a DES key in 9 seconds to deepcracks 56 hours.
-Miner privacy
-
-In principle a miner should therefore for privacy use a different reward-address for each block (and reset the counter to 0). Why Satoshi's early mined bitcoins were potentially linked, was because while he changed the reward-addresss, he forgot to reset the counter after each successful mine, which is a bitcoin mining privacy bug. In fact with bitcoin the counter also should be obscured otherwise you would reveal your effort level, and if you have a lot of mining power that may imply who the coin belongs to. Bitcoin does this via the nonce and extra-nonce. Nonce starts at 0, but extra nonce is random. Together these form a randomized counter hiding the amount of effort that went into the proof, so no one can tell if it was a powerful but unlucky miner who worked hard, or a weak miner who was very lucky.
-
-Additionally with the introduction of mining pools, if the miner uses the same reward address for all users, which is what the current mining protocols do, then there is risk that users may redo work. To avoid users redoing work, miners hand out defined work for the users to do. However this creates an unnecessary communication round trip and in early protocol versions perhaps was a factor in the decision to have the pool send the actual block to mine, which means the miners are not validating their own blocks, which delegates validation authority, though not work, to the pool operator, reducing the security of the bitcoin network. The more recent mining protocol version allows the user to add their own block definition, but still unnecessarily incur round trips for handing out work allocation. Because the new pooled-mining protocol has a miner chosen extraNonce this acts as a random start factor so there is actually no need to talk to the pool for work allocation, a pool could have a static published address, and miners could just do work of whatever size they chose, and submit it to the pool as a UDP packet. (If privacy is required by the miner, it could use the public derivation method from BIP 32 to allow the node to tell the miner via an encrypted message with the mining work, which factor to multiply the static public key by.) 
 '''

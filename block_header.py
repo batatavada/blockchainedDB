@@ -1,7 +1,7 @@
-import hashcash
-import hash_256
+import hashcash 
+import hash_sha256
 import time
-import datetime, time
+import datetime
 from random import randrange
 
 '''
@@ -12,21 +12,33 @@ A timestamp is accepted as valid if it is greater than the median timestamp of p
 '''
         
 class block_header:
-    def __int__(self, difficulty_target):
+    def __int__(self):
         self.version = None
-        self.index = index
         self.previous_block_hash = None
-        self.timestamp = get_unix_time() #This is used in bitcoin
-        self.timestamp_readable = get_readable_time()
-        self.difficulty_target = difficulty_target
-        self.nonce = set_nonce()
- 
+        self.merkle_root = None
+        self.timestamp = None #This is used in bitcoin
+        #self.timestamp_readable = get_readable_time()
+        self.bits = None
+        self.nonce = None
 
+# from https://blockchain.info/api/blockchain_api
+        self.index = None
+        self.tx = 22,
+        self.size = 9195, 
+        self.block_index = 818044,
+        self.main_chain = true,
+        self.height = 154595,
+        self.received_time = 1322131301,
+        self.relayed_by = "108.60.208.156",
+        self.tx = [--Array of Transactions--]
+
+'''
     # HASH FUNCTION OF REQUIRED NUMBER OF ARGUMENTS
-    def get_block_hash(self):
-        block_hash = hash_256(self.version, self.previous_block_hash, self.timestamp, get_difficulty_target, randomly_incremented_nonce)
+    #def get_block_hash(self):
+
 
     def search(self):
+        search = 
         self.increment_nonce()
 
 
@@ -76,3 +88,4 @@ class block_header:
 
    
 
+'''

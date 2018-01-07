@@ -13,10 +13,12 @@ class test_block_header_hash(unittest.TestCase):
 	'''
 	@classmethod
 	def tearDownClass(cls):
-		print 'Testing Completed'
+		print('Testing Completed')
 
 	
 	def test_1(self):
+
+		print("TEST 1")
 		# example from https://blockexplorer.com/block/00000000000000001e8d6829a8a21adc5d38d0a473b144b6765798e61f98bd1d
 		version = "01000000"
 		prev_block_hash = "00000000000008a3a41b85b8b29ad444def299fee21793cd8b9e567eab02cd81"
@@ -25,16 +27,21 @@ class test_block_header_hash(unittest.TestCase):
 		bits = "440711666"
 		nonce = "2504433986"
 
-		#block = [version, prev_block_hash, merkle_root, timestamp, bits, nonce]
 		test = b.block_hash()
-		output = test.get_block_hash(version, prev_block_hash, merkle_root, timestamp, bits, nonce)
+		block_header_vars = test.prep_block_vars(version, prev_block_hash, merkle_root, timestamp, bits)
+		print("block_header_vars: {}".format(block_header_vars))
+
+		output = test.get_block_hash(block_header_vars, nonce)
 
 		#hash solution found online
 		online_calculated_hash = '00000000000000001e8d6829a8a21adc5d38d0a473b144b6765798e61f98bd1d'
 
 		self.assertEqual(output, online_calculated_hash)
 
+
 	def test_2(self):
+
+		print("\n\nTEST 2")
 		# example from https://blockchain.info/api/blockchain_api
 		version = "01000000"
 		prev_block_hash = "00000000000007d0f98d9edca880a6c124e25095712df8952e0439ac7409738a"
@@ -45,7 +52,9 @@ class test_block_header_hash(unittest.TestCase):
 
 		#block = [version, prev_block_hash, merkle_root, timestamp, bits, nonce]
 		test = b.block_hash()
-		output = test.get_block_hash(version, prev_block_hash, merkle_root, timestamp, bits, nonce)
+		block_header_vars = test.prep_block_vars(version, prev_block_hash, merkle_root, timestamp, bits)
+
+		output = test.get_block_hash(block_header_vars, nonce)
 
 		#hash solution found online
 		online_calculated_hash = '0000000000000bae09a7a393a8acded75aa67e46cb81f7acaa5ad94f9eacd103'
