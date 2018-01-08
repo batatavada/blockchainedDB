@@ -1,0 +1,16 @@
+global-include *.py
+global-include *.txt
+global-include *.pdf
+global-include *.ps
+global-include *.c
+global-include Makefile
+global-include makefile*
+global-include *.v
+global-include *.vhd
+prune .hg
+prune dist
+prune doc
+prune olddoc
+graft doc/build/html
+#include doc/paper-a4/blockchainedDB.pdf
+#include doc/paper-letter/blockchainedDB.pdf
