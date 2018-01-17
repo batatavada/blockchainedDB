@@ -138,6 +138,20 @@ if __name__ == '__main__':
             hash_power = float(long(nonce)/elapsed_time)
             print "Hashing power: %ld hashes per second" % hash_power'''
 '''
+
+bits = "1d00ffff"
+
+bits = "62fff"
+bits = bits
+
+exponent, coefficient = "0x" + bits[:2], "0x" + bits[2:]
+print("exponent, coefficient:"+ exponent, coefficient)
+target = hex(int(coefficient,16) * 2**(8*(int(exponent,16) - 3))).rstrip("L").lstrip("0x")
+#print(target)
+target = target.zfill(64)
+print("TARGET:" + target)
+'''
+'''
 from numpy import genfromtxt
 import matplotlib.pyplot as plt
 
@@ -179,7 +193,6 @@ leg = ax.legend(['abc'], loc = 'center left', bbox_to_anchor = (1.0, 0.5))
 
 fig.savefig('aaa.png')
 '''
-'''
 
 >>> s = "FooBar"
 >>> s_len = 10
@@ -206,40 +219,3 @@ b'\x8b\xa3\xf7h'
 >>> s_bytes
 b'466f6f426172'
 
-'''
-'''
-
-import block_utils as bu
-
-b = "0x42a14695"
-n = bu.little_endian(b)
-print(n)
-'''
-
-#target = "0x00FFFF0000000000000000000000000000000000000000000000000000000000"
-'''
-# NUMBER OF DIGITS IN BASE 256 REPRESENTATION
-len = len(hex(int(target,16))[2:]) >> 1
-
-if(int(hex(int(target,16))[2:4],16) > 127):
-    len+=1
-    compact =hex(int(len)) + "00"+ hex(int(target,16))[2:6]
-else:
-    compact = hex(int(len)) + hex(int(target,16))[2:6] + "00"
-
-print(compact)
-
-
-
-'''
-import block_utils as bu
-import hash_sha256 as h
-v = "01000000"
-p = "81cd02ab7e569e8bcd9317e2fe99f2de44d49ab2b8851ba4a308000000000000"
-m = "e320b6c2fffc8d750423db8b1eb942ae710e951ed797f7affc8892b0f1fc122b"
-t = "c7f5d74d"
-ta = "f2b9441a"
-n = "42a14695"
-
-mh = h.get_block_hash(v,p,m,t,ta,n)
-print(mh)

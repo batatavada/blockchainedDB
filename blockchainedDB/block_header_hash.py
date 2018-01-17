@@ -1,67 +1,103 @@
-#BLOCK HASH
-# Block hash calculated as per this block:
-# https://blockexplorer.com/block/00000000000000001e8d6829a8a21adc5d38d0a473b144b6765798e61f98bd1d 
-
 import hash_sha256 as h
-
-class block_hash:
-
-	def prep_block_vars(self, version, prev_block_hash, merkle_root, timestamp, bits):
-		#print("test_proof_of_work")
-		self.version = version
-		#print("\nVersion: " + self.version)
-
-		self.prev_block_hash = self.little_endian(prev_block_hash)
-		#print("\nPrev block hash: " + self.prev_block_hash)
-
-		self.merkle_root = self.little_endian(merkle_root)
-		#print("\nMerkle root: " + self.merkle_root)
-
-		self.timestamp = self.hexLittleEndian(timestamp)
-		#print("\nTimestamp: " + self.timestamp)
-
-		self.bits = self.hexLittleEndian(bits)
-		#print("\nBits: " + self.bits)
-
-		block = str(self.version + self.prev_block_hash + self.merkle_root + self.timestamp + self.bits)
-
-		return block
-
-
-	def get_block_hash(self, vars, nonce):
-
-		self.nonce = self.hexLittleEndian(nonce)
-		#print("\nNonce: " + self.nonce)
-
-		block = (vars + self.nonce)
-
-		#print("\nBlock Header: {}".format(block))
-		block_hash = self.hash_calculation(block)
-
-		#print("\nBlock Header Hash: {}".format(block_hash))
-		return str(block_hash,'utf-8')
+import block_utils as bu
 
 
 
-	def hexLittleEndian(self, data):
-		x = hex(int(data))
-		data  = self.little_endian(x)
-		return data[:-2]
+def get_genvars(block):
+	""" Extract the available block instance variables and get their concatenated hash
+	ARGS:
+		- block instance variables like version, previous_block_hash etc in Big ENDIAN FORMAT
+			+ block.version (STRING BE)
+			+ block.prev_block_hash (STRING BE) "000.."
+			+ block.merkle_root (STRING BE)  
+			+ block.timestamp (DECIMAL INT BE)
+			+ block.bits (HEX STRING BE)
+			+ block.nonce (DECIMAL INT BE)
+	RETURNS:
+		- concatenated hash in STRING (BE)
+	"""
+	version = block.version
+	print("\nVersion: " + version)
+
+	prev_block_hash = block.prev_block_hash
+	print("\nPrev block hash: " + prev_block_hash)
+
+	merkle_root = bu.little_endian(block.merkle_root).lstrip('0x')
+	print("\nMerkle root: " + merkle_root)
+
+	timestamp = bu.hexLittleEndian(block.timestamp).strip('0x')
+	print("\nTimestamp: " + timestamp)
+
+	bits = bu.little_endian(block.bits.lstrip('0x')).lstrip('0x')
+	print("\nBits: " + bits)
+
+	genvars = h.concat(version, prev_block_hash, merkle_root, timestamp, bits)
+
+	return genvars
 
 
 
-	def little_endian(self, hex):
-		littleEndian = "";
-		if len(hex) % 2 != 0:
-		    return littleEndian	
-
-		for x in reversed(hex):
-			littleEndian = littleEndian + hex[-2:]
-			hex = hex[:-2]
-		return littleEndian
 
 
-	def hash_calculation(self, block):
-		# creating object of hash_sha256 class
-		x = h.hashing()
-		return x.get_block_hash(block)
+def get_blockvars(block):
+	""" Extract the available block instance variables and get their concatenated hash
+	ARGS:
+		- block instance variables like version, previous_block_hash etc in Big ENDIAN FORMAT
+			+ block.version (STRING BE)
+			+ block.prev_block_hash (STRING BE)
+			+ block.merkle_root (STRING BE)  
+			+ block.timestamp (DECIMAL INT BE)
+			+ block.bits (HEX STRING BE)
+			+ block.nonce (DECIMAL INT BE)
+	RETURNS:
+		- concatenated hash in STRING (BE)
+	"""
+	version = block.version
+	print("\nVersion: " + version)
+
+	prev_block_hash = bu.little_endian(block.prev_block_hash).lstrip('0x')
+	print("\nPrev block hash: " + prev_block_hash)
+
+	merkle_root = bu.little_endian(block.merkle_root).lstrip('0x')
+	print("\nMerkle root: " + merkle_root)
+
+	timestamp = bu.hexLittleEndian(block.timestamp).rstrip('0x')
+	print("\nTimestamp: " + timestamp)
+
+	bits = bu.little_endian(block.bits).strip('0x')
+	print("\nBits: " + bits)
+
+	blockvars = h.concat(version, prev_block_hash, merkle_root, timestamp, bits)
+
+	return blockvars
+
+
+
+
+
+
+def get_block_hash(blockvars, nonce):
+	""" Concats blockvars with interim_nonce and returns hash during proof of work
+	ARGS:
+		- all block instance variables except nonce etc in Big ENDIAN FORMAT
+			+ concatenated blockvars (HEX STRING)
+		- block.nonce (DECIMAL INT BE)
+	RETURNS:
+		- concatenated hash in STRING (BE)
+	"""
+	n = bu.hexLittleEndian(nonce).strip('0x')
+
+	# APPEND ZERO IF LENGTH OF NONCE IS ODD. BECAUSE BINASCII.UNHEXLIFYY(USED IN hash_sha256) REQUIRED EVEN LENGTH
+	n = n if(len(n)%2==0) else n.zfill(len(n)+1)
+	print("\nNonce: " + n)
+	block_hash = h.hash_args(blockvars, n)
+	return block_hash
+
+
+
+
+
+def hash_calculation(block_string):
+	# creating object of hash_sha256 class
+	x = h.hashing()
+	return x.get_block_hash(block_string)

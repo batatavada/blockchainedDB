@@ -1,36 +1,138 @@
-import hashcash 
-import hash_sha256
-import time
-import datetime
-from random import randrange
+import      hash_sha256     as h
+import      hashcash        as hc
+import      random          as r
+import      time
+import      datetime
+import      hashlib
+import      codecs
+
 
 '''
-This is a 4-byte timestamp, encoded as a Unix ‘Epoch’ timestamp which is a system for describing a point in time, defined as the number of seconds that have elapsed since 00:00:00 Coordinated Universal Time (UTC), Thursday, 1 January 1970, minus the number of leap seconds that have taken place since then. 
-        
-A timestamp is accepted as valid if it is greater than the median timestamp of previous 11 blocks, and less than the network-adjusted time + 2 hours. “Network-adjusted time” is the median of the timestamps returned by all nodes connected to you. As a result, block timestamps are not exactly accurate, and they do not even need to be in order. Block times are accurate only to within an hour or two. An added feature of this field is to make it more difficult to hash the block and hence more difficult to hack it.
+Block headers are serialized in the 80-byte format described below and then hashed as part of Bitcoin’s proof-of-work algorithm, making the serialized header format part of the consensus rules.
 
-'''
-        
-class block_header:
-    def __int__(self):
-        self.version = None
-        self.previous_block_hash = None
-        self.merkle_root = None
-        self.timestamp = None #This is used in bitcoin
-        #self.timestamp_readable = get_readable_time()
+        +-----------------------------------+
+        |           |           |           |
+        |   BYTES   |   NAME    | DATA TYPE | 
+        |           |           |           |    
+        |-----------|-----------|-----------|
+        |     4     |  version  |  int32_t  | 
+        |-----------|-----------|-----------| 
+        |    32     | previous  |  char[32] |
+        |           |block hash |           | 
+        |-----------|-----------|-----------| 
+        |     4     |  time     |  uint32_t | 
+        |-----------|-----------|-----------| 
+        |     4     |  nBits    |  uint32_t | 
+        |-----------|-----------|-----------|  
+        |     4     |  nonce    |  uint32_t | 
+        +-----------------------------------+
+
+        '''
+
+
+class BlockHeader:
+
+    def __int__(self, version, height):
+        self.height = height
+        self.version = version
+        self.previousBlockHash = None
+        self.merkleRoot = None
+        self.timestamp = None 
         self.bits = None
         self.nonce = None
+        self.difficulty = None
 
-# from https://blockchain.info/api/blockchain_api
-        self.index = None
-        self.tx = 22,
+        '''
+        self.n_tx = 22,
         self.size = 9195, 
         self.block_index = 818044,
         self.main_chain = true,
         self.height = 154595,
         self.received_time = 1322131301,
         self.relayed_by = "108.60.208.156",
-        self.tx = [--Array of Transactions--]
+        #self.tx = [--Array of Transactions--]
+        '''
+
+
+
+
+
+    def createBlock(self, version):
+        self.height += 1
+        self.version = version
+        self.merkleRoot = getMerkleRoot()
+        self.timestamp = int(time.time())
+        self.nonce = r.randint(1,2**32)
+        self.difficulty, self.bits = retarget()
+
+
+
+'''
+
+    def proof_of_work(self):
+        print("\n\nBlock Height (I): {}".format(self.height))
+        timestamp = int(time.time()) 
+        current_difficulty, target = test_hashcash.retarget(index, blocks, update_limit, num_blocks, expected_time)
+
+        test_header_vars = test_header.prep_block_vars(version, prev_block_hash, merkle_root, str(timestamp), bits)
+        
+        nonce, mining_time, final_hash = test_hashcash.proofOfWork_random(test_header_vars, target)
+        
+
+
+
+
+
+
+    def add_to_chain(self, version, prev_block_hash, merkle_root, timestamp, bits):
+        
+        self.version = version
+        #print("\nVersion: " + self.version)
+
+        self.prev_block_hash = self.little_endian(prev_block_hash)
+        #print("\nPrev block hash: " + self.prev_block_hash)
+
+        self.merkle_root = self.little_endian(merkle_root)
+        #print("\nMerkle root: " + self.merkle_root)
+
+        self.timestamp = self.hexLittleEndian(timestamp)
+        #print("\nTimestamp: " + self.timestamp)
+
+        self.bits = self.hexLittleEndian(bits)
+        #print("\nBits: " + self.bits)
+
+        block = str(self.version + self.prev_block_hash + self.merkle_root + self.timestamp + self.bits)
+
+        return block
+
+
+
+
+
+
+    def get_block_hash(self, vars, nonce):
+
+        self.nonce = self.hexLittleEndian(nonce)
+        #print("\nNonce: " + self.nonce)
+
+        block = (vars + self.nonce)
+
+        #print("\nBlock Header: {}".format(block))
+        block_hash = self.hash_calculation(block)
+
+        #print("\nBlock Header Hash: {}".format(block_hash))
+        return str(block_hash)
+
+
+
+
+
+
+    def hash_calculation(self, block):
+        x = h.hashing()
+        return x.get_block_hash(block)
+'''
+
 
 '''
     # HASH FUNCTION OF REQUIRED NUMBER OF ARGUMENTS
