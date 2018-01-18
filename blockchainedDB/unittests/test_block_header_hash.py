@@ -5,6 +5,7 @@ import time
 import block_utils as bu
 import random
 import hashcash as hc
+import csv
 
 class test_block_header_hash(unittest.TestCase):
 	
@@ -20,14 +21,18 @@ class test_block_header_hash(unittest.TestCase):
 	def tearDownClass(cls):
 		print('Testing Completed')
 
-	
+
+
+
+
 
 
 
 	def test1_block_header_hash(self):
 		max_target = "0x0000FFFF00000000000000000000000000000000000000000000000000000000"
 		""" GENESIS BLOCK: CREATION """
-		block = bh.BlockHeader()		
+		block = bh.BlockHeader()	
+		print(block.version)			
 
 		""" GENESIS BLOCK: HEADER VALUES
 		 ----------------------------------------------------------------------------------------"""
@@ -38,23 +43,23 @@ class test_block_header_hash(unittest.TestCase):
 		block.bits = bu.target_to_bits(max_target)
 		block.nonce = None
 		""" ----------------------------------------------------------------------------------------"""
-		difficulty = 1		
-		
+		difficulty = 1				
+
 		""" GENESIS BLOCK: FINDING NONCE
-		 --------------------------------------------------------------------------------------------"""		
+		 --------------------------------------------------------------------------------------------"""				
 
 		# 1. GET HASH OF ALL HEADER VALUES (EXCEPT NONCE)
-		genvars = bhh.get_genvars(block)
+		genvars = bhh.get_genvars(block)		
 
 		# 2. PROOF OF WORK
 		nonce, mining_time, genesis_hash = hc.proofOfWork_random(genvars, max_target)
 		print("genhash:"+genesis_hash)
 		# genhash:0000c5faa68c1fc743c26cc047ed2f7756cad9f9fc64c7bae2ebc5607b579bf2
-		PRINT("mining_time:"+mining_time)
+		print("mining_time: {}".format(mining_time))
 		'''
 		# 3. ADD GENESIS BLOCK TO BLOCKCHAIN LIST
 		block = [timestamp, bits, difficulty, nonce, genesis_hash, mining_time]
-		blocks.append(block)     		
+		blocks.append(block)     				
 
 		print("genesis_block: {}".format(blocks))'''
 
@@ -64,7 +69,7 @@ class test_block_header_hash(unittest.TestCase):
 
 
 	def test2_block_header_hash(self):
-		print("\n\nTEST 2")
+		#print("\n\nTEST 2")
 		block = bh.BlockHeader()
 		# example from https://blockchain.info/api/blockchain_api
 		block.version = "01000000"
@@ -82,6 +87,16 @@ class test_block_header_hash(unittest.TestCase):
 		online_calculated_hash = '00000000000000001e8d6829a8a21adc5d38d0a473b144b6765798e61f98bd1d'
 
 		self.assertEqual(output, online_calculated_hash)
+
+		with open('test.csv', 'w') as f:
+			writer = csv.writer(f)
+			writer.writerow([["TIMESTAMP"],["BITS"],["DIFFICULTY"], ["NONCE"], ["HASH"], ["MINING_TIME"]])
+			writer.writerow((block.version, block.prev_block_hash, block.merkle_root, block.timestamp))
+
+
+
+
+
 
 
 if __name__ == '__main__':

@@ -31,7 +31,7 @@ Block headers are serialized in the 80-byte format described below and then hash
         '''
 
 
-class BlockHeader:
+class blockHeader:
 
     def __init__(self):
         self.height = None
@@ -46,17 +46,18 @@ class BlockHeader:
 
 
 
-    def createBlock(self, version, prevBlock):
+    def createBlock1(self, version, prevBlock):
         print("createBlock")
         #self.height += 1
         self.version = version
+        print("yo"+str(self.version))
         self.prevBlockHash = bhh.get_hash(prevBlock)
-        print("prevBlockHash: "+str(self.prevBlockHash))
+        print("yo"+str(self.prevBlockHash))
         self.merkleRoot = "90eaf5f6d7a99dfe56ae97ff4e6791efe759d451d80dcc4c25b90749db9087d2"
         self.timestamp = int(time.time())
         self.nonce = r.randint(1,2**32)
         self.bits = prevBlock.bits
-        print("create block"+str(self))
+        print(self)
         return self
 
 
@@ -67,7 +68,7 @@ class BlockHeader:
 
 
     def getNextBlock(self, chain, update_limit, num_blocks, expected_time):          
-        print("getNextBlock")
+
         blockvars = bhh.get_blockvars(self)        
 
         current_difficulty, target = test_hashcash.retarget(chain, update_limit, num_blocks, expected_time)
