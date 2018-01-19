@@ -3,31 +3,74 @@ import block_header as bh
 
 
 class Blockchain():
-    def __init__(self):
+
+    def createChain(self):
+        print("createChain")
         """
         CHAIN FORMAT:    KEY    -->      VALUE
                     hashpointer --> block header data
         """
-        self.chain = {}
-        self.current_transactions = []
+        self.chain = []
+
+        return self
 
 
 
-        
-    def newlock(self, block):
-        block = bh.BlockHeader()
-        block.createBlock("01000000")
+  
+
+
+    def extendChain(self, version):   
+        print("extendChain")
+        update_limit = 2
+        num_blocks = 10 
+        expected_time = 60*5
+        self.version = version
+        block = self.newBlock(version)
+        newBlock = block.getNextBlock(self.chain, update_limit, num_blocks, expected_time)
+        return newBlock
 
 
 
 
 
+
+    def newBlock(self, version):
+        print("newBlock")
+        blockHeader = bh.BlockHeader()
+        blockHeader.createBlock(self.version, self.prevBlock())
+        return blockHeader
+
+
+
+
+
+
+    def prevBlock(self):
+        print("prevBlock")
+        return self.chain[-1]
+
+
+
+
+
+
+    def addBlock(self, block):
+        print("addBlock")
+        self.chain.append(block)
+
+
+
+
+'''
     
     @staticmethod
     def add_Block(block):
         """ Adds a block to the main chain
         """
         validation = self.validate(block)
+        if(validation):
+            chain.append(block)
+
 
 
 
@@ -38,28 +81,9 @@ class Blockchain():
         """ Adds a block to the main chain
         """
 
-        validation = false
+        validation = true
 
         return validation
 
-
-
-
-
-
-    
-    @property
-    def last_block(self):
-        # Returns the last Block in the chain
-        pass
-
-
-
-
-    
-    def new_transaction(self):
-        # Adds a new transaction to the list of transactions
-        pass
-
-
+'''
 

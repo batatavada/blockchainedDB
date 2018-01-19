@@ -34,7 +34,7 @@ def concat(*args):
 
 
 def hash256(data):
-	print("od:"+data)
+	#print("od:"+data)
 	import binascii
 	# get the binary data (byte string) represented by the hexadecimal string
 	header_bin = binascii.unhexlify(data)

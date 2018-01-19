@@ -89,6 +89,16 @@ def bits_to_difficulty(max_target, bits):
 
 
 
+
+def target_to_difficulty(target, max_target):
+    return int(max_target,16)/int(target,16)
+
+
+
+
+
+
+
 def difficulty_to_target(difficulty, max_target):
     """
     Get BigEndian target as hex STRING from difficulty.
@@ -102,7 +112,7 @@ def difficulty_to_target(difficulty, max_target):
     NOTES: MAX TARGET IS TARGET WITH LOWEST DIFFICULTY
 
     """
-    target = hex(int(max_target,16)/difficulty)
+    target = hex(int(int(max_target,16)/difficulty))
     return target
 
 
@@ -120,6 +130,7 @@ def hexLittleEndian(decimal):
         - h: hex number with prefix "0x" (STRING)
 
     """
+    #print(type(decimal))
     h  = little_endian(hex(decimal))
     return h
 
@@ -138,7 +149,7 @@ def little_endian(hex):
         - littleEndian: hex number in LittleEndian (STRING) with prefix '0x'
 
     """
-    littleEndian = "";
+    littleEndian = '0'*64;
     if len(hex) % 2 != 0:
         return littleEndian 
     for x in reversed(hex):
