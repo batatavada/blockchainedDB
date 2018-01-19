@@ -20,7 +20,7 @@ bl = bh.BlockHeader()
 update_limit = 1
 expected_time = 5*60
 num_blocks = 10        
-difficulty = 1500
+difficulty = 3000
 f = open('diff 4.15-1000.csv', 'w')
 writer = csv.writer(f)
 writer.writerow(["TIMESTAMP BITS DIFFICULTY NONCE HASH MINING_TIME"])
@@ -70,10 +70,10 @@ index = 1
 
 while (difficulty < 10000):
 
-    difficulty += 2.5
+    difficulty += 50
     index = 0
 
-    while(index< 25):   
+    while(index < 25):   
 
         print("\n\nDifficulty: (R): {}".format(difficulty)) 
         print("\n\nBlock Height (R): {}".format(index)) 
